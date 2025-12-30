@@ -1,0 +1,38 @@
+{
+  "name": "streamplanner-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "screenshots": "node scripts/screenshot.js",
+    "test:e2e": "npx playwright test",
+    "test:e2e:update": "npx playwright test -u",
+    "test:auth-sync": "npx playwright test tests/auth-sync.spec.js",
+    "test:watchlist": "npx playwright test tests/watchlist.spec.js",
+    "test:watchlist-ui": "npx playwright test tests/watchlist-ui.spec.js",
+    "test:watchlist-a11y": "npx playwright test tests/watchlist-a11y.spec.js",
+    "test:title-ui": "npx playwright test tests/title-ui.spec.js",
+    "test:title-a11y": "npx playwright test tests/title-a11y.spec.js"
+  },
+  "dependencies": {
+    "next": "13.5.7",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "@supabase/supabase-js": "^2.31.0",
+    "@supabase/auth-helpers-react": "^3.0.2",
+    "@supabase/auth-helpers-nextjs": "^0.3.35",
+    "@prisma/client": "4.15.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.40.0",
+    "autoprefixer": "10.4.14",
+    "axe-core": "4.8.0",
+    "postcss": "8.4.24",
+    "playwright": "^1.40.0",
+    "prisma": "4.15.0",
+    "tailwindcss": "3.4.7"
+  }
+}

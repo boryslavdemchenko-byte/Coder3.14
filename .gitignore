@@ -1,0 +1,10 @@
+node_modules/
+.next/
+playwright-report/
+tests/__snapshots__/
+tests/**/__screenshots__/
+scripts/output/
+
+# test helpers and temporary data
+tests/helpers/.cache/
+

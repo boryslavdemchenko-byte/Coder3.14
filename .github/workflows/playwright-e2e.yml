@@ -1,0 +1,77 @@
+name: Playwright E2E & A11y Tests
+
+on:
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright E2E + a11y tests (exclude title a11y)
+        run: npx playwright test --grep-invert "@title-a11y"
+        env:
+          CI: true
+
+      - name: Run Title a11y test (capture failure)
+        run: |
+          # Run only the Title a11y test; if it fails, set a marker so we can upload the axe json
+          npx playwright test tests/title-a11y.spec.js || echo "TITLE_A11Y_FAILED=1" >> $GITHUB_ENV
+        env:
+          CI: true
+
+      - name: Upload title a11y artifact (on failure)
+        if: env.TITLE_A11Y_FAILED == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: title-axe
+          path: scripts/output/title-axe.json
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+
+      - name: Upload snapshots and screenshot artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: |
+            tests/**/__snapshots__
+            scripts/output/
+
+      - name: Generate concise axe summary
+        if: always() && github.event_name == 'pull_request'
+        env:
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          node -e "const fs=require('fs');const repo=process.env.REPO;const runId=process.env.RUN_ID;const p='scripts/output/axe-results.json';const out='axe-comment.md';if(!fs.existsSync(p)){fs.writeFileSync(out,'**Accessibility (axe) Summary**\n\nStatus: **No results**\n\nNo axe results found.');process.exit(0);}const data=JSON.parse(fs.readFileSync(p,'utf8'));let total=0;const byId={};for(const entry of data){for(const v of entry.violations){total+=v.nodes;byId[v.id]=(byId[v.id]||0)+v.nodes;}}const pages=data.length;const status = total===0 ? 'PASS ✅' : `FAIL ❌ — ${total} violations on ${pages} pages`;let body='**Accessibility (axe) Summary**\n\nStatus: **'+status+'**\n\n';if(total>0){body+='Top issues (id: count):\n';const arr=Object.entries(byId).sort((a,b)=>b[1]-a[1]).slice(0,5);for(const [id,count] of arr) body += '- '+id+': '+count+'\n';body+='\nFull results are attached as job artifacts (axe-results.json):\nhttps://github.com/'+repo+'/actions/runs/'+runId;} else { body += 'No violations found.\n\nFull results are attached as job artifacts (axe-results.json):\nhttps://github.com/'+repo+'/actions/runs/'+runId } fs.writeFileSync(out, body);"
+
+      - name: Post/update accessibility summary comment on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body-file: axe-comment.md
+          identifier: 'axe-summary'

@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --bg: #F9F9F9;
+  --card: #FFFFFF;
+  --text-primary: #111111;
+  --text-secondary: #6B7280;
+  --accent: #1F2937;
+  --border: #E5E7EB;
+}
+
+html,body,#__next{height:100%}
+body{background:var(--bg);color:var(--text-primary);font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
+
+/* Card: default is row layout, stack on small screens for better mobile UX */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; display:flex; gap:1rem; align-items:flex-start; }
+@media (max-width: 640px){ .card { flex-direction: column; } }
+.card img { border-radius: 8px; }
+
+.pill { background: var(--accent); color: #fff; padding: 0.25rem 0.5rem; border-radius: 8px; font-weight:600 }
+.small-muted { color: var(--text-secondary); font-size: 0.85rem }
+
+/* Accessibility: visible focus states for keyboard users */
+button:focus-visible, a:focus-visible, .small-muted:focus-visible { outline: 3px solid rgba(31,41,55,0.12); outline-offset: 2px; box-shadow: 0 0 0 4px rgba(31,41,55,0.06); }
+
+/* Small-muted links/buttons should be visually focusable */
+.small-muted:focus-visible { background: rgba(31,41,55,0.04); border-radius: 6px; padding: 2px 4px; }
+

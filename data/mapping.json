@@ -1,0 +1,16 @@
+{
+  "frames": [
+    {"id": "Home_Web"},
+    {"id": "Recommendations_Web"},
+    {"id": "Watchlist_Web"},
+    {"id": "Title_Detail_Web"},
+    {"id": "Subscription_Detail_Web"},
+    {"id": "Donate_Web"},
+    {"id": "Stripe_Payment_Modal_Web"}
+  ],
+  "recommendations": [
+    {"id":1,"title":"The Example","genre":"Crime","year":2023,"poster":"/assets/poster-placeholder.svg","match":78},
+    {"id":2,"title":"Another Show","genre":"Drama","year":2024,"poster":"/assets/poster-placeholder.svg","match":84},
+    {"id":3,"title":"Indie Pick","genre":"Indie","year":2022,"poster":"/assets/poster-placeholder.svg","match":71}
+  ]
+}
