@@ -43,8 +43,8 @@ export default async function handler(req, res){
       // Upsert Title by tmdbId
       const dbTitle = await prisma.title.upsert({
         where: { tmdbId: title.tmdbId },
-        update: { title: title.title, poster: title.poster, genre: title.genre, year: title.year },
-        create: { tmdbId: title.tmdbId, title: title.title, poster: title.poster, genre: title.genre, year: title.year }
+        update: { title: title.title, poster: title.poster, genre: title.genre, year: title.year, type: title.type },
+        create: { tmdbId: title.tmdbId, title: title.title, poster: title.poster, genre: title.genre, year: title.year, type: title.type }
       })
 
       // Check if watchlist item exists

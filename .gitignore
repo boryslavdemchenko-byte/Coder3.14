@@ -8,3 +8,7 @@ scripts/output/
 # test helpers and temporary data
 tests/helpers/.cache/
 
+# local env files
+.env.local
+.env
+.DS_Store

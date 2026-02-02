@@ -4,12 +4,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        bg: '#F9F9F9',
-        card: '#FFFFFF',
-        primary: '#111111',
-        secondary: '#6B7280',
-        accent: '#1F2937',
-        border: '#E5E7EB'
+        bg: '#F5F5DC',
+        card: '#FAF0E6',
+        primary: '#000000',
+        secondary: '#333333',
+        accent: '#000000',
+        border: '#D3C6AA'
+      },
+      fontFamily: {
+        sans: ['var(--font-inter)', 'sans-serif'],
       }
     }
   },

@@ -3,6 +3,9 @@ import Head from 'next/head'
 import { useState } from 'react'
 import { SessionContextProvider } from '@supabase/auth-helpers-react'
 import { createBrowserClient } from '../lib/supabaseClient'
+import { Inter } from 'next/font/google'
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export default function App({ Component, pageProps }){
   const [supabaseClient] = useState(() => createBrowserClient())
@@ -40,11 +43,13 @@ export default function App({ Component, pageProps }){
   return (
     <>
       <Head>
-        <title>StreamPlanner</title>
+        <title>Flico</title>
         <meta name="viewport" content="width=device-width,initial-scale=1" />
       </Head>
       <SessionContextProvider supabaseClient={supabaseClient} initialSession={pageProps.initialSession}>
-        <Component {...pageProps} />
+        <div className={`${inter.variable} font-sans`}>
+          <Component {...pageProps} />
+        </div>
       </SessionContextProvider>
     </>
   )

@@ -26,9 +26,13 @@ export default function Profile(){
   useState(()=>{ fetchDbUser() })
 
 
-  if (!user) return (
-    <div className="min-h-screen"><Header /><main className="px-6 py-8 max-w-6xl mx-auto">Please <a href="/auth/signin" className="text-blue-600">sign in</a>.</main></div>
-  )
+  if (!user) {
+    // client-side redirect to login for unauthenticated users
+    if (typeof window !== 'undefined') window.location.replace('/auth/login')
+    return (
+      <div className="min-h-screen"><Header /><main className="px-6 py-8 max-w-6xl mx-auto">Redirecting to sign in…</main></div>
+    )
+  }
 
   return (
     <div className="min-h-screen">

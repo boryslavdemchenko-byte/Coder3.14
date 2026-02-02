@@ -18,20 +18,23 @@
     "test:title-a11y": "npx playwright test tests/title-a11y.spec.js"
   },
   "dependencies": {
-    "next": "13.5.7",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "@prisma/client": "4.15.0",
+    "@supabase/auth-helpers-nextjs": "^0.8.7",
+    "@supabase/auth-helpers-react": "^0.4.0",
     "@supabase/supabase-js": "^2.31.0",
-    "@supabase/auth-helpers-react": "^3.0.2",
-    "@supabase/auth-helpers-nextjs": "^0.3.35",
-    "@prisma/client": "4.15.0"
+    "next": "13.5.7",
+    "openai": "^6.17.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
     "@playwright/test": "1.40.0",
     "autoprefixer": "10.4.14",
     "axe-core": "4.8.0",
-    "postcss": "8.4.24",
+    "eslint": "9.39.2",
+    "eslint-config-next": "16.1.1",
     "playwright": "^1.40.0",
+    "postcss": "8.4.24",
     "prisma": "4.15.0",
     "tailwindcss": "3.4.7"
   }

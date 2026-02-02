@@ -27,5 +27,4 @@ module.exports = {
   fullyParallel: false,
   // run tests that use the browser in CI with a longer timeout for reliability
   timeout: 60 * 1000
-}
 };
