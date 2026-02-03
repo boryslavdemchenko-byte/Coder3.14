@@ -22,7 +22,8 @@ export default function Home() {
         setRecommendations(items || [])
         setApiError('')
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('TMDB Trending Error:', err)
         setApiError('Unable to fetch TMDB data. Check NEXT_PUBLIC_TMDB_API_KEY.')
         setRecommendations([])
       })
@@ -34,13 +35,17 @@ export default function Home() {
         setReleases(items || [])
         setReleasesError('')
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('TMDB New Releases Error:', err)
         setReleasesError('Unable to fetch New Releases from TMDB.')
         setReleases([])
       })
     tmdb.getUpcoming()
       .then(items => setUpcoming(items || []))
-      .catch(() => setUpcoming([]))
+      .catch((err) => {
+        console.error('TMDB Upcoming Error:', err)
+        setUpcoming([])
+      })
   }, [])
   
   // New releases are static placeholders here
