@@ -3,7 +3,7 @@ const axeCore = require('axe-core');
 const fs = require('fs');
 const path = require('path');
 const { createTestUser, signInTestUser, deleteTestUserById } = require('./helpers/supabaseTestUtils')
-const prisma = require('../../lib/prisma').default || require('../../lib/prisma')
+const prisma = require('../lib/prisma').default || require('../lib/prisma')
 
 // Accessibility test for /watchlist page
 // - creates a test user

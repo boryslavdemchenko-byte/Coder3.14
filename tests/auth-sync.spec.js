@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const { createTestUser, signInTestUser, deleteTestUserById } = require('./helpers/supabaseTestUtils')
-const prisma = require('../../lib/prisma').default || require('../../lib/prisma')
+const prisma = require('../lib/prisma').default || require('../lib/prisma')
 
 // This test will:
 // 1) Create a new supabase test user via admin

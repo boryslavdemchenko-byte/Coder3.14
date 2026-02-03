@@ -31,6 +31,7 @@
     "@playwright/test": "1.40.0",
     "autoprefixer": "10.4.14",
     "axe-core": "4.8.0",
+    "dotenv": "^17.2.3",
     "eslint": "^8.57.1",
     "eslint-config-next": "^13.5.7",
     "playwright": "^1.40.0",

@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const { createTestUser, signInTestUser, deleteTestUserById } = require('./helpers/supabaseTestUtils')
-const prisma = require('../../lib/prisma').default || require('../../lib/prisma')
+const prisma = require('../lib/prisma').default || require('../lib/prisma')
 
 // UI test: sign in, add item via API, visit /watchlist, verify item visible, remove it, verify empty state.
 

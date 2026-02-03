@@ -1,4 +1,8 @@
 const { devices } = require('@playwright/test');
+require('dotenv').config({ path: '.env' });
+require('dotenv').config({ path: '.env.local', override: true });
+
+
 
 /** @type {import('@playwright/test').PlaywrightTestConfig} */
 module.exports = {
