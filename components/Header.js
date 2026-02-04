@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useEffect, useState } from 'react'
 import AuthModal from './AuthModal'
+import RedirectModal from './RedirectModal'
 
 export default function Header(){
   const user = useUser()
@@ -12,12 +13,24 @@ export default function Header(){
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
-  const [donateNotice, setDonateNotice] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [avatarColor, setAvatarColor] = useState('blue')
   const [avatarText, setAvatarText] = useState('👤')
   const [avatarImage, setAvatarImage] = useState(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [redirectConfig, setRedirectConfig] = useState({ isOpen: false, url: '' })
+
+  function handleDonateClick(e) {
+    e.preventDefault()
+    setRedirectConfig({
+      isOpen: true,
+      url: 'https://donate.stripe.com/test_00w8wI2Sx6Kb6OU93X6Na00'
+    })
+  }
+
+  function handleRedirectConfirm() {
+    window.open(redirectConfig.url, '_blank', 'noopener,noreferrer')
+  }
 
   async function signOut(){
     await supabase.auth.signOut()
@@ -117,23 +130,17 @@ export default function Header(){
             Watchlist
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
           </Link>
-          <button
-            type="button"
-            onClick={() => {
-              setDonateNotice(true)
-              setTimeout(() => {
-                window.open('https://donate.stripe.com/test_00w8wI2Sx6Kb6OU93X6Na00', '_blank', 'noopener,noreferrer')
-                setTimeout(() => setDonateNotice(false), 3500)
-              }, 4200)
-            }}
-            className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group"
+          <a
+            href="https://donate.stripe.com/test_00w8wI2Sx6Kb6OU93X6Na00"
+            onClick={handleDonateClick}
+            className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group cursor-pointer"
             aria-label="Donate"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
-          </button>
+          </a>
         </nav>
 
         {/* Search (Desktop) */}
@@ -238,21 +245,16 @@ export default function Header(){
             <Link href="/watchlist" className="text-lg font-medium text-gray-300 hover:text-white transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
               Watchlist
             </Link>
-            <button
-              type="button"
+            <a
+              href="https://donate.stripe.com/test_00w8wI2Sx6Kb6OU93X6Na00"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-left text-lg font-medium text-gray-300 hover:text-white transition-colors"
-              onClick={() => {
-                setIsMobileMenuOpen(false)
-                setDonateNotice(true)
-                setTimeout(() => {
-                  window.open('https://donate.stripe.com/test_00w8wI2Sx6Kb6OU93X6Na00', '_blank', 'noopener,noreferrer')
-                  setTimeout(() => setDonateNotice(false), 3500)
-                }, 4200)
-              }}
+              onClick={() => setIsMobileMenuOpen(false)}
               aria-label="Donate"
             >
               Donate
-            </button>
+            </a>
             <hr className="border-gray-800 my-2" />
             {user ? (
               <>
@@ -274,18 +276,13 @@ export default function Header(){
           </nav>
         </div>
       )}
-      {donateNotice && (
-        <div className="fixed bottom-6 right-6 z-[60] px-4 py-3 rounded-xl border border-gray-700 bg-black/80 text-gray-200 shadow-lg">
-          You will be redirected to a secure Stripe page in a new tab.
-          <button
-            onClick={() => setDonateNotice(false)}
-            className="ml-3 text-sm text-blue-400 hover:text-blue-300"
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      <RedirectModal 
+        isOpen={redirectConfig.isOpen} 
+        onClose={() => setRedirectConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={handleRedirectConfirm}
+        url={redirectConfig.url}
+      />
     </header>
   )
 }

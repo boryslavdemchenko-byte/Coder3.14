@@ -1,6 +1,6 @@
 import '../styles/globals.css'
 import Head from 'next/head'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { SessionContextProvider } from '@supabase/auth-helpers-react'
 import { createBrowserClient } from '../lib/supabaseClient'
 import { Inter } from 'next/font/google'
@@ -14,7 +14,10 @@ export default function App({ Component, pageProps }){
   // This sends the current access token to our secure server API which verifies
   // the token with Supabase admin client and upserts the user via Prisma.
   // This is safer than trusting client-only state and avoids manual sync steps.
-  useState(() => {
+  useEffect(() => {
+    // Apply global font to body so portals (like RedirectModal) can access it
+    document.body.classList.add(inter.variable, 'font-sans')
+
     // register listener once
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.access_token) {
@@ -38,14 +41,14 @@ export default function App({ Component, pageProps }){
 
     // Return cleanup to unsubscribe when unmounting
     return () => { subscription.unsubscribe() }
-  })
+  }, [supabaseClient])
 
   return (
     <>
       <Head>
         <title>Flico</title>
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <link rel="icon" href="/assets/favicon-circle.svg?v=2" />
+        <link rel="icon" href="/assets/favicon-round.svg" />
       </Head>
       <SessionContextProvider supabaseClient={supabaseClient} initialSession={pageProps.initialSession}>
         <div className={`${inter.variable} font-sans`}>
