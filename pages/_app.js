@@ -1,6 +1,6 @@
 import '../styles/globals.css'
 import Head from 'next/head'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { SessionContextProvider } from '@supabase/auth-helpers-react'
 import { createBrowserClient } from '../lib/supabaseClient'
 import { Inter } from 'next/font/google'
@@ -14,7 +14,7 @@ export default function App({ Component, pageProps }){
   // This sends the current access token to our secure server API which verifies
   // the token with Supabase admin client and upserts the user via Prisma.
   // This is safer than trusting client-only state and avoids manual sync steps.
-  useState(() => {
+  useEffect(() => {
     // register listener once
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.access_token) {
@@ -38,7 +38,7 @@ export default function App({ Component, pageProps }){
 
     // Return cleanup to unsubscribe when unmounting
     return () => { subscription.unsubscribe() }
-  })
+  }, [supabaseClient])
 
   return (
     <>

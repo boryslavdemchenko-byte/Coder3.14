@@ -91,13 +91,20 @@ export default function Login(){
         provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
-          skipBrowserRedirect: false,
+          skipBrowserRedirect: true,
         },
       })
       if (error) throw error
+      if (data?.url) {
+        window.location.href = data.url
+      }
     } catch (error) {
       setLoading(false)
-      setMsg('Error: ' + (error.message || 'Could not connect to provider'))
+      if (error.message?.includes('provider is not enabled')) {
+        setMsg(`Login failed: ${provider} login is not enabled in Supabase dashboard.`)
+      } else {
+        setMsg('Error: ' + (error.message || 'Could not connect to provider'))
+      }
     }
   }
 
