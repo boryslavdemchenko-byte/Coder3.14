@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
+import { useUser } from '@supabase/auth-helpers-react'
+import AuthModal from './AuthModal'
 
 const SYSTEM_PROMPT = `
 You are a friendly AI assistant that helps users discover movies and TV series.
@@ -8,7 +10,9 @@ You speak clearly, casually, and like ChatGPT.
 `
 
 export default function FlicoWidget() {
+  const user = useUser()
   const [isOpen, setIsOpen] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
   const [hasOpenedBefore, setHasOpenedBefore] = useState(false)
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
@@ -29,6 +33,11 @@ export default function FlicoWidget() {
   }
 
   function toggleWidget() {
+    if (!user) {
+      setAuthModalOpen(true)
+      return
+    }
+
     if (!isOpen && !hasOpenedBefore) {
       setHasOpenedBefore(true)
       // Initial greeting
@@ -89,6 +98,7 @@ export default function FlicoWidget() {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
       
       {/* Chat Window */}
       {isOpen && (

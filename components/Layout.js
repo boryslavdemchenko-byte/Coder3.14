@@ -4,9 +4,9 @@ import Footer from './Footer'
 import CookieConsent from './CookieConsent'
 import FlicoWidget from './FlicoWidget'
 
-export default function Layout({ children, title = 'Flico - Your Ultimate Movie Tracker' }) {
+export default function Layout({ children, title = 'Flico - Your Ultimate Movie Tracker', background = 'bg-[var(--bg)]' }) {
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text-primary)] flex flex-col font-sans selection:bg-blue-500/30">
+    <div className={`min-h-screen ${background} text-[var(--text-primary)] flex flex-col font-sans selection:bg-blue-500/30`}>
       <Head>
         <title>{title}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />

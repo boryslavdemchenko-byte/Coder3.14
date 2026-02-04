@@ -7,6 +7,7 @@ import { addToWatchlist, removeFromWatchlist, fetchWatchlist } from '../lib/watc
 import * as tmdb from '../lib/tmdb'
 import CalendarDrawer from '../components/calendar/CalendarDrawer'
 import BackButton from '../components/BackButton'
+import AuthModal from '../components/AuthModal'
 
 export default function NewReleases() {
   const supabase = useSupabaseClient()
@@ -17,6 +18,7 @@ export default function NewReleases() {
   const [allItems, setAllItems] = useState([])
   const [error, setError] = useState('')
   const [wlMsg, setWlMsg] = useState('')
+  const [showAuthModal, setShowAuthModal] = useState(false)
   const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY
 
   useEffect(() => {
@@ -119,7 +121,13 @@ export default function NewReleases() {
           </div>
           <button
             type="button"
-            onClick={() => setCalendarOpen(true)}
+            onClick={() => {
+              if (!user) {
+                setShowAuthModal(true)
+              } else {
+                setCalendarOpen(true)
+              }
+            }}
             className="px-4 py-2 rounded-full border border-blue-500/30 text-blue-400 hover:bg-blue-500/10 transition flex items-center gap-2 text-sm font-medium"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -161,6 +169,7 @@ export default function NewReleases() {
         )}
 
         <CalendarDrawer isOpen={calendarOpen} onClose={() => setCalendarOpen(false)} />
+        <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
       </div>
     </Layout>
   )

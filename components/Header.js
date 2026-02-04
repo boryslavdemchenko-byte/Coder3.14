@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useEffect, useState } from 'react'
+import AuthModal from './AuthModal'
 
 export default function Header(){
   const user = useUser()
@@ -16,6 +17,7 @@ export default function Header(){
   const [avatarColor, setAvatarColor] = useState('blue')
   const [avatarText, setAvatarText] = useState('👤')
   const [avatarImage, setAvatarImage] = useState(null)
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   async function signOut(){
     await supabase.auth.signOut()
@@ -25,6 +27,11 @@ export default function Header(){
   function handleSearch(e) {
     e.preventDefault()
     if (searchQuery.trim()) {
+      if (!user) {
+        setShowAuthModal(true)
+        setIsMobileMenuOpen(false)
+        return
+      }
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
       setIsMobileMenuOpen(false)
     }
@@ -222,9 +229,6 @@ export default function Header(){
             <Link href="/" className="text-lg font-medium text-gray-300 hover:text-white transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
               Home
             </Link>
-            <Link href="/advisor" className="text-lg font-medium text-gray-300 hover:text-white transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
-              Flico AI
-            </Link>
             <Link href="/recommendations" className="text-lg font-medium text-gray-300 hover:text-white transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
               Recommendations
             </Link>
@@ -281,6 +285,7 @@ export default function Header(){
           </button>
         </div>
       )}
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </header>
   )
 }
