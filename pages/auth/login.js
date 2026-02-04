@@ -3,6 +3,7 @@ import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Layout from '../../components/Layout'
+import BackButton from '../../components/BackButton'
 
 export default function Login(){
   const supabase = useSupabaseClient()
@@ -10,21 +11,18 @@ export default function Login(){
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
-  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
   const [usernameError, setUsernameError] = useState('')
   const [emailError, setEmailError] = useState('')
   const [passwordFeedback, setPasswordFeedback] = useState('')
-  const [phoneError, setPhoneError] = useState('')
   const [canSubmit, setCanSubmit] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [touched, setTouched] = useState({
     username: false,
     email: false,
-    password: false,
-    phone: false
+    password: false
   })
 
   useEffect(() => {
@@ -60,15 +58,6 @@ export default function Login(){
     return ''
   }
 
-  function validatePhone(value){
-    if (!value) return ''
-    const cleaned = value.replace(/[^\d+]/g,'')
-    const digits = cleaned.replace(/\D/g,'')
-    if (digits.length < 7) return 'Too short'
-    if (digits.length > 15) return 'Too long'
-    return ''
-  }
-
   useEffect(()=>{
     const uErr = validateUsername(username)
     setUsernameError(uErr)
@@ -76,12 +65,10 @@ export default function Login(){
     setEmailError(eErr)
     const pFeed = getPasswordFeedback(password)
     setPasswordFeedback(pFeed)
-    const phErr = validatePhone(phone)
-    setPhoneError(phErr)
-    const signUpValid = !uErr && !eErr && !pFeed && !phErr
+    const signUpValid = !uErr && !eErr && !pFeed
     const signInValid = !eErr && password.length >= 8
     setCanSubmit(isSignUp ? signUpValid : signInValid)
-  },[isSignUp, username, email, password, phone])
+  },[isSignUp, username, email, password])
 
   const handleOAuth = async (provider) => {
     setLoading(true)
@@ -132,7 +119,7 @@ export default function Login(){
       const { data, error } = await supabase.auth.signUp({
         email, 
         password,
-        options: { data: { username, phone } }
+        options: { data: { username } }
       })
       
       if (error) {
@@ -181,6 +168,11 @@ export default function Login(){
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none animate-pulse-slow"></div>
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none animate-pulse-slow delay-1000"></div>
 
+      {/* Back Button */}
+      <div className="absolute top-6 left-6 z-20">
+        <BackButton />
+      </div>
+
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 z-10">
         <div className="w-full max-w-[420px] mx-auto animate-in fade-in zoom-in-95 duration-500">
@@ -188,8 +180,12 @@ export default function Login(){
           {/* Logo Section */}
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center gap-3 group focus:outline-none">
-              <div className="relative overflow-hidden rounded-xl transition-transform duration-300 group-hover:scale-105 group-focus:ring-2 group-focus:ring-blue-500 shadow-lg shadow-blue-900/20">
-                <div className="h-12 w-12 bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white font-bold text-2xl">F</div>
+              <div className="relative overflow-hidden transition-transform duration-300 group-hover:scale-105 group-focus:ring-2 group-focus:ring-blue-500 rounded-full">
+                <img 
+                  src="/assets/FLICKO.png.png" 
+                  alt="Flico Logo" 
+                  className="h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] rounded-full" 
+                />
               </div>
               <span className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-tight">Flico</span>
             </Link>
@@ -288,26 +284,6 @@ export default function Login(){
                 )}
               </div>
 
-              {/* Phone (SignUp Only) */}
-              {isSignUp && (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-400 ml-1">Phone Number (Optional)</label>
-                  <div className="relative group">
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      onBlur={() => handleBlur('phone')}
-                      className={`w-full bg-black/40 border ${touched.phone && phoneError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-blue-500/50'} rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all`}
-                      placeholder="+1 (555) 000-0000"
-                    />
-                  </div>
-                  {touched.phone && phoneError && (
-                    <p className="text-xs text-red-400 ml-1 animate-in slide-in-from-top-1">{phoneError}</p>
-                  )}
-                </div>
-              )}
-
               {/* Error/Success Message */}
               {msg && (
                 <div className={`p-3 rounded-xl text-sm text-center animate-in fade-in slide-in-from-top-2 ${msg.includes('Check') ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
@@ -357,22 +333,11 @@ export default function Login(){
                   </svg>
                   <span>Continue with Google</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleOAuth('apple')}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-[#1a1a1a] hover:bg-[#252525] text-white font-bold border border-white/10 hover:border-white/20 rounded-xl transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-black/50"
-                >
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.05 20.28c-.98.95-2.05.88-3.08.35-1.09-.56-2.05-.48-3.08.02-1.04.51-2.05.57-3.08-.35-1.94-1.74-2.13-4.9-.1-6.91 1.03-1.02 2.37-1.31 3.39-.78 1 .52 2.05.52 3.08-.03 1.04-.55 2.37-.25 3.39.78.68.67 1.15 1.45 1.4 2.18-2.66.75-2.18 4.23.51 5.34zm-3.5-7.55c.52-2.19 2.57-3.4 2.57-3.4-.67-1.53-2.23-2.33-3.76-2.19-2.52.23-3.4 2.82-1.89 5.03.77 1.13 2.57 1.63 3.08.56z"/>
-                  </svg>
-                  <span>Continue with Apple</span>
-                </button>
               </div>
             </div>
 
             {/* Switch Mode */}
-            <div className="text-center">
+            <div className="text-center mt-8">
               <p className="text-gray-400 text-sm">
                 {isSignUp ? 'Already have an account?' : "Don't have an account?"}
                 <button

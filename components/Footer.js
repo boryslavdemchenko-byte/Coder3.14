@@ -1,7 +1,22 @@
 import Link from 'next/link'
+import { useState } from 'react'
+import RedirectModal from './RedirectModal'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
+  const [redirectConfig, setRedirectConfig] = useState({ isOpen: false, url: '' })
+
+  function handleSupportClick(e) {
+    e.preventDefault()
+    setRedirectConfig({
+      isOpen: true,
+      url: 'https://donate.stripe.com/test_00w8wI2Sx6Kb6OU93X6Na00'
+    })
+  }
+
+  function handleRedirectConfirm() {
+    window.open(redirectConfig.url, '_blank', 'noopener,noreferrer')
+  }
 
   return (
     <footer className="border-t border-gray-800 bg-black/60 backdrop-blur-xl pt-16 pb-8 mt-auto">
@@ -32,7 +47,14 @@ export default function Footer() {
           <h3 className="text-white font-bold mb-6">Company</h3>
           <ul className="space-y-3 text-sm text-gray-400">
             <li><Link href="/about" className="hover:text-blue-400 transition-colors">About Us</Link></li>
-            <li><a href="https://donate.stripe.com/test_00w8wI2Sx6Kb6OU93X6Na00" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">Support Flico</a></li>
+            <li>
+              <button 
+                onClick={handleSupportClick}
+                className="hover:text-blue-400 transition-colors cursor-pointer text-left"
+              >
+                Support Flico
+              </button>
+            </li>
             <li><Link href="/contact" className="hover:text-blue-400 transition-colors">Contact</Link></li>
           </ul>
         </div>
@@ -62,6 +84,13 @@ export default function Footer() {
           </a>
         </div>
       </div>
+
+      <RedirectModal 
+        isOpen={redirectConfig.isOpen} 
+        onClose={() => setRedirectConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={handleRedirectConfirm}
+        url={redirectConfig.url}
+      />
     </footer>
   )
 }

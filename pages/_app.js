@@ -15,6 +15,9 @@ export default function App({ Component, pageProps }){
   // the token with Supabase admin client and upserts the user via Prisma.
   // This is safer than trusting client-only state and avoids manual sync steps.
   useEffect(() => {
+    // Apply global font to body so portals (like RedirectModal) can access it
+    document.body.classList.add(inter.variable, 'font-sans')
+
     // register listener once
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.access_token) {
