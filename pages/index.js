@@ -6,11 +6,13 @@ import Card from '../components/Card'
 import mapping from '../data/mapping.json'
 import * as tmdb from '../lib/tmdb'
 import CalendarDrawer from '../components/calendar/CalendarDrawer'
+import AuthModal from '../components/AuthModal'
 
 export default function Home() {
   const user = useUser()
   const [recommendations, setRecommendations] = useState(mapping.recommendations || [])
   const [calendarOpen, setCalendarOpen] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
   const [apiError, setApiError] = useState('')
   const [releases, setReleases] = useState([])
   const [upcoming, setUpcoming] = useState([])
@@ -135,7 +137,13 @@ export default function Home() {
             <span className="hidden sm:inline-block px-2 py-1 text-xs font-bold text-red-500 bg-red-500/10 border border-red-500/20 rounded">HOT THIS WEEK</span>
             <button
               type="button"
-              onClick={() => setCalendarOpen(true)}
+              onClick={() => {
+                if (!user) {
+                  setAuthModalOpen(true)
+                } else {
+                  setCalendarOpen(true)
+                }
+              }}
               className="px-3 py-1.5 rounded-lg border border-blue-600 text-blue-400 hover:bg-blue-600/10 transition text-sm font-medium"
             >
               Calendar
@@ -156,6 +164,7 @@ export default function Home() {
         </div>
 
         <CalendarDrawer isOpen={calendarOpen} onClose={() => setCalendarOpen(false)} />
+        <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
       </section>
     </Layout>
   )

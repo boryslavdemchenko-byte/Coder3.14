@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import Layout from '../components/Layout'
 import { getSubscriptionAdvice, getMovieRecommendation } from '../lib/ai'
 import { MOVIE_DATA } from '../lib/movieLogic'
+import { useUser } from '@supabase/auth-helpers-react'
+import Link from 'next/link'
+import AuthModal from '../components/AuthModal'
 
 // Known entity lists for "NER" (Named Entity Recognition) simulation
 const KNOWN_MOVIES = Object.values(MOVIE_DATA).map(m => m.title.toLowerCase())
@@ -339,13 +342,53 @@ export default function Advisor() {
 
   function handleSubmit(e) {
     e.preventDefault()
+    if (!user) {
+      setShowAuthModal(true)
+      return
+    }
     const text = input
     setInput('')
     handleUserMessage(text)
   }
 
+  // Access Control: Block entire UI if not logged in
+  const user = useUser()
+  const [showAuthModal, setShowAuthModal] = useState(false)
+
+  if (!user) {
+    return (
+      <Layout title="AI Advisor - Flico">
+        <div className="max-w-4xl mx-auto py-20 px-6 text-center">
+          <div className="bg-[#121212] rounded-3xl p-12 border border-white/5 shadow-2xl relative overflow-hidden">
+             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500"></div>
+             
+             <div className="w-20 h-20 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+             </div>
+
+             <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">Unlock Flico AI</h1>
+             <p className="text-gray-400 text-lg mb-8 max-w-xl mx-auto">
+               Get personalized movie recommendations, subscription advice, and find where to watch your favorite titles with our advanced AI advisor.
+             </p>
+
+             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+               <Link href="/auth/login" className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition shadow-lg shadow-blue-900/20">
+                 Sign In to Chat
+               </Link>
+               <Link href="/auth/signup" className="w-full sm:w-auto px-8 py-3.5 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl transition border border-white/10">
+                 Create Account
+               </Link>
+             </div>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
+
   return (
-    <Layout title="FLICO - Movie & Series Expert">
+    <Layout title="AI Advisor - Flico">
       <div className="max-w-3xl mx-auto flex flex-col h-[calc(100vh-8rem)]">
         <div className="mb-4 text-center">
           <h1 className="text-3xl font-bold text-white mb-1">
@@ -399,6 +442,7 @@ export default function Advisor() {
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
+            onFocus={() => { if (!user) setShowAuthModal(true) }}
             placeholder="Type a message..."
             className="flex-1 px-4 py-3 rounded-2xl bg-gray-900/80 border border-gray-700 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
           />
@@ -413,6 +457,7 @@ export default function Advisor() {
           </button>
         </form>
       </div>
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </Layout>
   )
 }

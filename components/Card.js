@@ -1,8 +1,12 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import * as tmdb from '../lib/tmdb'
+import { useUser } from '@supabase/auth-helpers-react'
+import AuthModal from './AuthModal'
 
 export default function Card({ item, inWatchlist = false, onToggleWatchlist }) {
+  const user = useUser()
+  const [showAuthModal, setShowAuthModal] = useState(false)
   const isNew = item.year >= new Date().getFullYear();
   const matchColor = item.match >= 90 ? 'bg-green-500' : item.match >= 75 ? 'bg-blue-500' : 'bg-yellow-500';
   const [cert, setCert] = useState(item.certification || '')
@@ -50,12 +54,21 @@ export default function Card({ item, inWatchlist = false, onToggleWatchlist }) {
     return () => { cancelled = true }
   }, [item?.id, item?.type])
 
+  const handleLinkClick = (e) => {
+    if (!user) {
+      e.preventDefault()
+      setShowAuthModal(true)
+    }
+  }
+
   return (
-    <Link 
-      href={`/title/${item.id}${item.type ? `?type=${item.type}` : ''}`} 
-      aria-label={`Open ${item.title}`} 
-      className="group relative flex flex-col bg-[#121212] rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-    >
+    <>
+      <Link 
+        href={`/title/${item.id}${item.type ? `?type=${item.type}` : ''}`} 
+        onClick={handleLinkClick}
+        aria-label={`Open ${item.title}`} 
+        className="group relative flex flex-col bg-[#121212] rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      >
       {/* Poster Image */}
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-gray-900">
         <img 
@@ -145,5 +158,7 @@ export default function Card({ item, inWatchlist = false, onToggleWatchlist }) {
         </div>
       </div>
     </Link>
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+    </>
   )
 }

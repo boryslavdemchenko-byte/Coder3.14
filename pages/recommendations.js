@@ -6,6 +6,7 @@ import { fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../lib/watc
 import Link from 'next/link'
 import BackButton from '../components/BackButton'
 import * as tmdb from '../lib/tmdb'
+import AuthModal from '../components/AuthModal'
 
 export default function Recommendations() {
   const supabase = useSupabaseClient()
@@ -14,6 +15,7 @@ export default function Recommendations() {
   const [recommendations, setRecommendations] = useState([])
   const [loading, setLoading] = useState(true)
   const [wlMsg, setWlMsg] = useState('')
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -115,6 +117,12 @@ export default function Recommendations() {
                   <div className="flex items-center gap-4">
                     <Link 
                       href={`/title/${heroItem.id}?type=${heroItem.type}`}
+                      onClick={(e) => {
+                        if (!user) {
+                          e.preventDefault()
+                          setShowAuthModal(true)
+                        }
+                      }}
                       className="bg-white text-black px-8 py-3.5 rounded-full font-bold hover:bg-gray-200 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.15)]"
                     >
                       View Details
@@ -154,6 +162,7 @@ export default function Recommendations() {
           </>
         )}
       </div>
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </Layout>
   )
 }
