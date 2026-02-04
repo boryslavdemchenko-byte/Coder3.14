@@ -83,6 +83,23 @@ export default function Login(){
     setCanSubmit(isSignUp ? signUpValid : signInValid)
   },[isSignUp, username, email, password, phone])
 
+  const handleOAuth = async (provider) => {
+    setLoading(true)
+    setMsg('')
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      if (error) throw error
+    } catch (error) {
+      setLoading(false)
+      setMsg('Error: ' + error.message)
+    }
+  }
+
   async function handleSubmit(e){
     e.preventDefault()
     setMsg('')
@@ -120,7 +137,7 @@ export default function Login(){
       
       if (!data?.session) {
         setLoading(false)
-        setMsg('Account created — check your email to confirm. Then sign in.')
+        setMsg('Account created! Please check your email to confirm. (Check spam folder if needed)')
         setIsSignUp(false)
         return
       }
@@ -313,14 +330,16 @@ export default function Login(){
             <div className="mt-6">
               <div className="relative my-6 flex items-center gap-3">
                 <div className="h-px flex-1 bg-white/10"></div>
-                <span className="text-xs uppercase text-gray-500 font-medium tracking-wider">Or continue with</span>
+                <span className="text-xs uppercase text-gray-500 font-medium tracking-wider">Instant Access with</span>
                 <div className="h-px flex-1 bg-white/10"></div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all duration-200 group"
+                  onClick={() => handleOAuth('google')}
+                  disabled={loading}
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="h-5 w-5 text-white group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -332,7 +351,9 @@ export default function Login(){
                 </button>
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all duration-200 group"
+                  onClick={() => handleOAuth('apple')}
+                  disabled={loading}
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="h-5 w-5 text-white group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M17.05 20.28c-.98.95-2.05.88-3.08.35-1.09-.56-2.05-.48-3.08.02-1.04.51-2.05.57-3.08-.35-1.94-1.74-2.13-4.9-.1-6.91 1.03-1.02 2.37-1.31 3.39-.78 1 .52 2.05.52 3.08-.03 1.04-.55 2.37-.25 3.39.78.68.67 1.15 1.45 1.4 2.18-2.66.75-2.18 4.23.51 5.34zm-3.5-7.55c.52-2.19 2.57-3.4 2.57-3.4-.67-1.53-2.23-2.33-3.76-2.19-2.52.23-3.4 2.82-1.89 5.03.77 1.13 2.57 1.63 3.08.56z"/>
