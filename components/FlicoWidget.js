@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useUser } from '@supabase/auth-helpers-react'
+import { useUser } from '../pages/_app'
 import ReactMarkdown from 'react-markdown'
 import AuthModal from './AuthModal'
 
@@ -24,6 +24,29 @@ export default function FlicoWidget() {
   const inputRef = useRef(null)
   const user = useUser()
 
+  function FlicoBotIcon({ className }) {
+    return (
+      <svg viewBox="0 0 64 64" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="3" opacity="0.85" />
+        <path
+          d="M22 27c0-4 3-7 7-7h6c4 0 7 3 7 7v10c0 4-3 7-7 7h-6c-4 0-7-3-7-7V27z"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinejoin="round"
+        />
+        <circle cx="28.5" cy="31.5" r="3.5" stroke="currentColor" strokeWidth="3" />
+        <circle cx="35.5" cy="31.5" r="3.5" stroke="currentColor" strokeWidth="3" />
+        <path d="M27 41h10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        <path
+          d="M42 33l8 4v-8l-8 4z"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinejoin="round"
+        />
+      </svg>
+    )
+  }
+
   // Auto-scroll to bottom
   useEffect(() => {
     if (isOpen) {
@@ -38,8 +61,20 @@ export default function FlicoWidget() {
     }
   }, [isOpen, isThinking])
 
-  function toggleWidget() {
-    setIsOpen(!isOpen)
+  useEffect(() => {
+    if (!user && isOpen) setIsOpen(false)
+  }, [user, isOpen])
+
+  function openWidget() {
+    if (!user) {
+      setAuthModalOpen(true)
+      return
+    }
+    setIsOpen(true)
+  }
+
+  function closeWidget() {
+    setIsOpen(false)
   }
 
   function handleClearChat() {
@@ -51,6 +86,10 @@ export default function FlicoWidget() {
 
   async function handleUserMessage(text) {
     if (!text.trim() || isThinking) return
+    if (!user) {
+      setAuthModalOpen(true)
+      return
+    }
 
     const newMsg = { role: "user", content: text }
     // Optimistically update UI
@@ -134,8 +173,8 @@ export default function FlicoWidget() {
           {/* Header */}
           <div className="bg-white/5 backdrop-blur-md px-5 py-4 border-b border-white/10 flex items-center justify-between z-10">
              <div className="flex items-center gap-3">
-               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center text-xl shadow-lg shadow-blue-500/20">
-                 🤖
+               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center text-xl shadow-lg shadow-blue-500/20 text-white">
+                 <FlicoBotIcon className="w-6 h-6" />
                </div>
                <div>
                  <h3 className="text-white font-bold text-base tracking-wide">Flico AI</h3>
@@ -156,7 +195,7 @@ export default function FlicoWidget() {
                  </svg>
                </button>
                <button 
-                 onClick={toggleWidget}
+                 onClick={closeWidget}
                  className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
                >
                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
@@ -284,14 +323,17 @@ export default function FlicoWidget() {
       {/* Floating Toggle Button */}
       {!isOpen && (
         <button
-          onClick={toggleWidget}
+          onClick={openWidget}
           className="group relative flex items-center justify-center w-16 h-16 bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-[0_0_20px_rgba(37,99,235,0.5)] transition-all hover:scale-110 active:scale-95"
+          aria-label={user ? 'Open Flico AI chat' : 'Sign in to use Flico AI'}
         >
           <span className="absolute -top-1 -right-1 flex h-4 w-4">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500 border-2 border-gray-900"></span>
           </span>
-          <span className="text-3xl group-hover:rotate-12 transition-transform duration-300">🤖</span>
+          <span className="text-white group-hover:rotate-6 transition-transform duration-300">
+            <FlicoBotIcon className="w-9 h-9" />
+          </span>
         </button>
       )}
     </div>

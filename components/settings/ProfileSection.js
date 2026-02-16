@@ -103,19 +103,17 @@ export default function ProfileSection({ formData, onChange }) {
               <input 
                 type="email" 
                 value={formData.email || ''} 
-                disabled 
-                className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-black/40 border border-white/5 text-gray-500 cursor-not-allowed font-medium" 
+                onChange={(e) => onChange('email', e.target.value)}
+                className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-black/40 border border-white/10 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all font-medium placeholder-gray-600"
+                placeholder="your@email.com"
               />
-              <div className="absolute left-4 top-3.5 text-gray-600">
+              <div className="absolute left-4 top-3.5 text-gray-500">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
               </div>
-              <div className="absolute right-4 top-3.5 text-gray-700">
-                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-              </div>
             </div>
-            <p className="mt-2 text-xs text-gray-600 flex items-center gap-1">
+            <p className="mt-2 text-xs text-gray-500 flex items-center gap-1">
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              To change your email, please contact support.
+              Changing email requires verification.
             </p>
           </div>
 
@@ -125,14 +123,23 @@ export default function ProfileSection({ formData, onChange }) {
               <input 
                 type="text" 
                 value={formData.username || ''} 
-                onChange={e => onChange('username', e.target.value)}
-                className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-black/40 border border-white/10 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-blue-900/10 outline-none transition-all font-medium"
-                placeholder="Enter your username"
+                onChange={(e) => onChange('username', e.target.value)}
+                className={`w-full pl-11 pr-4 py-3.5 rounded-xl bg-black/40 border text-white outline-none transition-all font-medium placeholder-gray-600
+                  ${formData.username && (formData.username.length < 3 || !/^[A-Za-z0-9_]+$/.test(formData.username)) 
+                    ? 'border-red-500/50 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
+                    : 'border-white/10 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}
+                `}
+                placeholder="Username"
               />
               <div className="absolute left-4 top-3.5 text-gray-500 group-focus-within:text-blue-500 transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
               </div>
             </div>
+            {formData.username && (formData.username.length < 3 || formData.username.length > 20 || !/^[A-Za-z0-9_]+$/.test(formData.username)) && (
+               <p className="text-red-400 text-xs mt-2 ml-1">
+                 Username must be 3-20 characters, alphanumeric or underscores only.
+               </p>
+            )}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import Header from '../../components/Header'
 import { useRouter } from 'next/router'
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
+import { useSupabaseClient, useUser } from '../_app'
 import { useEffect, useState, useRef } from 'react'
 import { addToWatchlist, removeFromWatchlist, fetchWatchlist } from '../../lib/watchlistClient'
 import BackButton from '../../components/BackButton'
@@ -119,6 +119,24 @@ export default function Title() {
       
       {/* Hero Section */}
       <div className="relative w-full min-h-[85vh] md:min-h-[75vh] bg-black transition-all duration-500 flex flex-col justify-end">
+        <button
+          type="button"
+          onClick={() => {
+            if (typeof window !== 'undefined' && window.history.length > 1) {
+              router.back()
+            } else {
+              router.push('/recommendations')
+            }
+          }}
+          className="absolute top-24 left-6 md:top-8 md:left-8 z-50 px-5 py-2.5 bg-black/60 hover:bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-white font-bold transition-all flex items-center gap-2 group shadow-xl"
+          aria-label="Go back"
+        >
+          <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 12H5" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
         {showTrailer && selectedVideo ? (
           <div className="absolute inset-0 z-50 animate-in fade-in zoom-in-95 duration-500">
              <iframe 
@@ -175,7 +193,7 @@ export default function Title() {
                  {details.title}
                </h1>
 
-               {details.tagline && <p className="text-xl text-gray-400 italic font-light">"{details.tagline}"</p>}
+               {details.tagline && <p className="text-xl text-gray-400 italic font-light">&ldquo;{details.tagline}&rdquo;</p>}
 
                {/* Rating & Genres */}
                <div className="flex flex-wrap items-center gap-6">

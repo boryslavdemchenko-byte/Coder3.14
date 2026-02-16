@@ -83,12 +83,18 @@ export default function About() {
                     In a world with endless content, finding what to watch shouldn't feel like a chore. We built Flico to bring clarity to the chaos. 
                   </p>
                   <p className="text-gray-400 text-lg leading-relaxed">
-                    Whether you're a casual viewer or a dedicated cinephile, our goal is to provide a seamless, personalized, and social experience that connects you with the stories that matter.
+                    Whether you&apos;re a casual viewer or a dedicated cinephile, our goal is to provide a seamless, personalized, and social experience that connects you with the stories that matter.
                   </p>
                 </div>
                 <div className="relative h-64 w-full rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden border border-white/10 flex items-center justify-center group-hover:scale-[1.02] transition-transform duration-500">
                    {/* Abstract Visual Representation */}
-                   <div className="absolute inset-0 bg-[url('/assets/grid-pattern.svg')] opacity-20"></div>
+                   <div
+                     className="absolute inset-0 opacity-30 bg-cover bg-center"
+                     style={{
+                       backgroundImage:
+                         "url('https://coreva-normal.trae.ai/api/ide/v1/text_to_image?prompt=cinematic%20collage%20of%20movie%20and%20tv%20posters%2C%20staggered%20diagonal%20grid%2C%20dark%20vignette%20left%2C%20vivid%20poster%20colors%20right%2C%20glossy%20modern%20look%2C%20soft%20depth%20of%20field%2C%20high%20detail%2C%2016%3A9&image_size=landscape_16_9')",
+                     }}
+                   ></div>
                    <div className="w-24 h-24 bg-blue-500/20 rounded-full blur-2xl absolute top-1/4 left-1/4 animate-pulse"></div>
                    <div className="w-32 h-32 bg-purple-500/20 rounded-full blur-3xl absolute bottom-1/4 right-1/4 animate-pulse delay-700"></div>
                    <div className="z-10 text-center">

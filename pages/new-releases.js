@@ -1,7 +1,7 @@
 import Layout from '../components/Layout'
 import Link from 'next/link'
 import Card from '../components/Card'
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
+import { useSupabaseClient, useUser } from './_app'
 import { useEffect, useState } from 'react'
 import { addToWatchlist, removeFromWatchlist, fetchWatchlist } from '../lib/watchlistClient'
 import * as tmdb from '../lib/tmdb'

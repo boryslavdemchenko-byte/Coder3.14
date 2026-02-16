@@ -1,5 +1,5 @@
 import Header from '../components/Header'
-import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
+import { useUser, useSupabaseClient } from './_app'
 import { useState } from 'react'
 
 export default function Profile(){

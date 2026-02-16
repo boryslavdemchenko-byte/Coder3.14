@@ -1,7 +1,7 @@
 import Layout from '../components/Layout'
 import Card from '../components/Card'
 import { useEffect, useState } from 'react'
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
+import { useSupabaseClient, useUser } from './_app'
 import { fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../lib/watchlistClient'
 import Link from 'next/link'
 import BackButton from '../components/BackButton'
@@ -102,7 +102,7 @@ export default function Recommendations() {
 
                 <div className="relative z-10 p-8 md:p-16 flex flex-col justify-end min-h-[500px] max-w-3xl">
                   <div className="flex items-center gap-3 mb-4 text-sm font-medium text-blue-400 tracking-wider uppercase">
-                    <span className="bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">Editor's Pick</span>
+                    <span className="bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">Editor&apos;s Pick</span>
                     <span>{heroItem.type === 'tv' ? 'TV Series' : 'Movie'}</span>
                   </div>
                   

@@ -1,7 +1,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { useUser } from '@supabase/auth-helpers-react'
+import { useUser } from '../pages/_app'
 import AuthModal from './AuthModal'
 
 export default function LibraryCard({ item, onRemove }) {
