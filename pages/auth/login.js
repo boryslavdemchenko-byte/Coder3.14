@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useSupabaseClient } from '@supabase/auth-helpers-react'
+import { useState, useEffect, useCallback } from 'react'
+import { useSupabaseClient } from '../../pages/_app'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Layout from '../../components/Layout'
@@ -9,16 +9,20 @@ export default function Login(){
   const supabase = useSupabaseClient()
   const router = useRouter()
   const [isSignUp, setIsSignUp] = useState(false)
+  const [isResend, setIsResend] = useState(false)
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [msg, setMsg] = useState('')
+  const [notice, setNotice] = useState(null)
+  const [devConfirmLoading, setDevConfirmLoading] = useState(false)
   const [usernameError, setUsernameError] = useState('')
   const [emailError, setEmailError] = useState('')
   const [passwordFeedback, setPasswordFeedback] = useState('')
   const [canSubmit, setCanSubmit] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
+  const [is2FA, setIs2FA] = useState(false)
+  const [mfaCode, setMfaCode] = useState('')
   const [touched, setTouched] = useState({
     username: false,
     email: false,
@@ -28,34 +32,53 @@ export default function Login(){
   useEffect(() => {
     if (router.query.signup === 'true') {
       setIsSignUp(true)
+      setIsResend(false)
     }
   }, [router.query])
 
-  function validateEmailFormat(value){
+  useEffect(() => {
+    if (!router.isReady) return
+    const { error, message } = router.query
+    if (typeof error === 'string' && error.length > 0) {
+      setNotice({ type: 'error', text: decodeURIComponent(error) })
+    }
+    if (typeof message === 'string' && message.length > 0) {
+      setNotice({ type: 'success', text: decodeURIComponent(message) })
+    }
+  }, [router.isReady, router.query])
+
+  const validateEmailFormat = useCallback((value) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return re.test(String(value).toLowerCase())
-  }
+  }, [])
 
-  function validateUsername(value){
-    if (!isSignUp) return ''
+  const validateUsername = useCallback((value) => {
+    if (!isSignUp || isResend) return ''
     const re = /^[A-Za-z0-9_]{3,20}$/
-    if (!value) return 'Username is required'
+    if (!value) return ''
     if (value.length < 3) return 'Username must be at least 3 characters'
     if (value.length > 20) return 'Username must be at most 20 characters'
     if (!re.test(value)) return 'Use letters, numbers, and underscores only'
     return ''
-  }
+  }, [isSignUp])
 
-  function getPasswordFeedback(value){
-    if (!isSignUp) {
-      return value.length >= 8 ? '' : 'Password too short'
+  const getPasswordFeedback = useCallback((value) => {
+    if (!value) return ''
+    return value.length >= 6 ? '' : 'Password must be at least 6 characters'
+  }, [])
+
+  function formatAuthError(error){
+    const message = (error?.message || '').toLowerCase()
+    if (message.includes('user already registered') || message.includes('already')) {
+      return 'Email already in use. Try signing in instead.'
     }
-    const lenOk = value.length >= 8 && value.length <= 32
-    const upperOk = /[A-Z]/.test(value)
-    const numberOk = /\d/.test(value)
-    if (!lenOk) return 'Password must be 8–32 characters'
-    if (!upperOk || !numberOk) return 'Include at least 1 uppercase letter and 1 number'
-    return ''
+    if (message.includes('password') && (message.includes('6') || message.includes('weak') || message.includes('short'))) {
+      return 'Weak password. Use at least 6 characters.'
+    }
+    if (error?.status === 429 || message.includes('rate limit')) {
+      return 'Too many attempts. Please wait a moment and try again.'
+    }
+    return error?.message || 'Authentication failed. Please try again.'
   }
 
   useEffect(()=>{
@@ -66,38 +89,14 @@ export default function Login(){
     const pFeed = getPasswordFeedback(password)
     setPasswordFeedback(pFeed)
     const signUpValid = !uErr && !eErr && !pFeed
-    const signInValid = !eErr && password.length >= 8
-    setCanSubmit(isSignUp ? signUpValid : signInValid)
-  },[isSignUp, username, email, password])
-
-  const handleOAuth = async (provider) => {
-    setLoading(true)
-    setMsg('')
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          skipBrowserRedirect: true,
-        },
-      })
-      if (error) throw error
-      if (data?.url) {
-        window.location.href = data.url
-      }
-    } catch (error) {
-      setLoading(false)
-      if (error.message?.includes('provider is not enabled')) {
-        setMsg(`Login failed: ${provider} login is not enabled in Supabase dashboard.`)
-      } else {
-        setMsg('Error: ' + (error.message || 'Could not connect to provider'))
-      }
-    }
-  }
+    const signInValid = !eErr && password.length >= 6
+    const resendValid = !eErr
+    setCanSubmit(isResend ? resendValid : (isSignUp ? signUpValid : signInValid))
+  },[isSignUp, isResend, username, email, password, validateUsername, validateEmailFormat, getPasswordFeedback])
 
   async function handleSubmit(e){
     e.preventDefault()
-    setMsg('')
+    setNotice(null)
     
     setLoading(true)
     
@@ -113,27 +112,80 @@ export default function Login(){
       } catch {}
     }
     
+    const trimmedEmail = email.trim()
+    const trimmedUsername = username.trim()
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+
+    if (is2FA) {
+      if (!mfaCode || mfaCode.length < 6) return;
+      
+      const { data: factors } = await supabase.auth.mfa.listFactors();
+      const totpFactor = factors?.all?.find(f => f.factor_type === 'totp');
+      
+      if (!totpFactor) {
+         setLoading(false);
+         setNotice({ type: 'error', text: 'No 2FA setup found. Please contact support.' });
+         return;
+      }
+
+      const { data, error } = await supabase.auth.mfa.challengeAndVerify({
+        factorId: totpFactor.id,
+        code: mfaCode
+      });
+
+      if (error) {
+        setLoading(false);
+        setNotice({ type: 'error', text: 'Invalid authentication code.' });
+        return;
+      }
+      
+      router.replace('/recommendations');
+      return;
+    }
+
+    if (isResend) {
+      if (!canSubmit) { setLoading(false); return }
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: trimmedEmail,
+        options: {
+          emailRedirectTo: `${siteUrl}/auth/callback?next=/onboarding`
+        }
+      })
+      
+      setLoading(false)
+      if (error) {
+        return setNotice({ type: 'error', text: error.message || 'Failed to resend confirmation email.' })
+      }
+      setNotice({ type: 'success', text: `Confirmation email resent to ${trimmedEmail}. Check your inbox (and spam).` })
+      return
+    }
+
     if (isSignUp) {
       if (!canSubmit) { setLoading(false); return }
       // Sign up
       const { data, error } = await supabase.auth.signUp({
-        email, 
+        email: trimmedEmail,
         password,
-        options: { data: { username } }
+        options: {
+          emailRedirectTo: `${siteUrl}/auth/callback?next=/onboarding`,
+          data: trimmedUsername ? { username: trimmedUsername } : {}
+        }
       })
       
       if (error) {
         setLoading(false)
-        if (error.message?.toLowerCase().includes('already')) {
-          return setMsg('That email already exists. Try signing in.')
-        }
-        return setMsg('Error: ' + error.message)
+        return setNotice({ type: 'error', text: formatAuthError(error) })
       }
       
       if (!data?.session) {
         setLoading(false)
-        setMsg('Account created! Please check your email to confirm. (Check spam folder if needed)')
+        setNotice({
+          type: 'success',
+          text: `If ${trimmedEmail} is new, we sent a confirmation email. If it already has an account, no new account was created. Check spam, or use “Resend Email”.`
+        })
         setIsSignUp(false)
+        setIsResend(false)
         return
       }
       await syncProfile()
@@ -142,23 +194,65 @@ export default function Login(){
     } else {
       if (!canSubmit) { setLoading(false); return }
       // Sign in
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      const { data, error } = await supabase.auth.signInWithPassword({ email: trimmedEmail, password })
       
       if (error) {
         setLoading(false)
         if (error.message?.toLowerCase().includes('invalid') || error.message?.toLowerCase().includes('password')) {
-          return setMsg('Incorrect email or password.')
+          return setNotice({ type: 'error', text: 'Incorrect email or password.' })
         }
-        return setMsg('Error: ' + error.message)
+        return setNotice({ type: 'error', text: formatAuthError(error) })
       }
+      
+      // Check MFA
+      const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (mfaData?.nextLevel === 'aal2' && mfaData?.currentLevel !== 'aal2') {
+         setIs2FA(true);
+         setLoading(false);
+         setNotice(null);
+         return;
+      }
+
       await syncProfile()
       setLoading(false)
-      router.replace('/recommendations')
+      
+      // Check if user has completed onboarding
+      if (data?.user?.user_metadata?.onboarded) {
+        router.replace('/recommendations')
+      } else {
+        router.replace('/onboarding')
+      }
     }
   }
 
   const handleBlur = (field) => {
     setTouched(prev => ({ ...prev, [field]: true }))
+  }
+
+  async function generateDevConfirmLink() {
+    if (devConfirmLoading) return
+    const trimmedEmail = email.trim()
+    if (!trimmedEmail) return
+    setDevConfirmLoading(true)
+    try {
+      const res = await fetch('/api/auth/dev-confirmation-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: trimmedEmail }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json?.error || 'Could not generate link')
+      if (json?.ok) {
+        setNotice({ type: 'success', text: `Confirmed ${trimmedEmail}. You can sign in now.` })
+        setIsResend(false)
+      } else {
+        throw new Error('Confirmation failed')
+      }
+    } catch (err) {
+      setNotice({ type: 'error', text: err?.message || 'Could not generate link' })
+    } finally {
+      setDevConfirmLoading(false)
+    }
   }
 
   return (
@@ -198,17 +292,44 @@ export default function Login(){
 
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold text-white mb-2">
-                {isSignUp ? 'Create your account' : 'Welcome back'}
+                {isResend ? 'Resend Confirmation' : (isSignUp ? 'Create your account' : 'Welcome back')}
               </h1>
               <p className="text-gray-400 text-sm">
-                {isSignUp ? 'Join Flico to track movies & get recommendations' : 'Enter your details to access your watchlist'}
+                {isResend ? 'Enter your email to receive a new confirmation link' : (isSignUp ? 'Join Flico to track movies & get recommendations' : 'Enter your details to access your watchlist')}
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              
-              {/* Username (SignUp Only) */}
-              {isSignUp && (
+
+              {is2FA ? (
+                <div className="space-y-1.5 animate-in slide-in-from-right duration-300">
+                  <label className="text-xs font-medium text-gray-400 ml-1">Two-Factor Authentication</label>
+                  <div className="relative group">
+                    <input
+                      type="text"
+                      value={mfaCode}
+                      onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      className="w-full bg-black/40 border border-white/10 focus:border-blue-500/50 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-center tracking-[0.5em] font-mono text-lg"
+                      placeholder="000000"
+                      maxLength={6}
+                      autoFocus
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 text-center mt-2">
+                    Enter the code from your authenticator app.
+                  </p>
+                  <button 
+                    type="button" 
+                    onClick={() => { setIs2FA(false); setMfaCode(''); }}
+                    className="text-xs text-blue-400 hover:text-blue-300 block mx-auto mt-4 hover:underline transition-all"
+                  >
+                    Back to Login
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* Username (SignUp Only) */}
+              {isSignUp && !isResend && (
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-gray-400 ml-1">Username</label>
                   <div className="relative group">
@@ -217,8 +338,9 @@ export default function Login(){
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       onBlur={() => handleBlur('username')}
+                      autoComplete="username"
                       className={`w-full bg-black/40 border ${touched.username && usernameError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-blue-500/50'} rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all`}
-                      placeholder="MovieBuff123"
+                      placeholder="MovieBuff123 (optional)"
                     />
                   </div>
                   {touched.username && usernameError && (
@@ -236,6 +358,7 @@ export default function Login(){
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onBlur={() => handleBlur('email')}
+                    autoComplete="email"
                     className={`w-full bg-black/40 border ${touched.email && emailError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-blue-500/50'} rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all`}
                     placeholder="you@example.com"
                   />
@@ -249,6 +372,7 @@ export default function Login(){
               </div>
 
               {/* Password */}
+              {!isResend && (
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-medium text-gray-400 ml-1">Password</label>
@@ -264,6 +388,8 @@ export default function Login(){
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onBlur={() => handleBlur('password')}
+                    autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                    minLength={6}
                     className={`w-full bg-black/40 border ${touched.password && passwordFeedback ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-blue-500/50'} rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all pr-12`}
                     placeholder="••••••••"
                   />
@@ -281,20 +407,36 @@ export default function Login(){
                 </div>
                 {touched.password && passwordFeedback && (
                   <p className="text-xs text-red-400 ml-1 animate-in slide-in-from-top-1">{passwordFeedback}</p>
-                )}
               </div>
+              </div>
+              )}
+              </>
+              )}
 
               {/* Error/Success Message */}
-              {msg && (
-                <div className={`p-3 rounded-xl text-sm text-center animate-in fade-in slide-in-from-top-2 ${msg.includes('Check') ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                  {msg}
+              {notice?.text && (
+                <div className={`p-3 rounded-xl text-sm text-center animate-in fade-in slide-in-from-top-2 ${notice.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                  {notice.text}
+                </div>
+              )}
+
+              {isResend && (
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={generateDevConfirmLink}
+                    disabled={devConfirmLoading || !email}
+                    className="w-full bg-white/5 hover:bg-white/10 text-white font-medium py-3 rounded-xl border border-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {devConfirmLoading ? 'Confirming…' : 'Confirm email (dev)'}
+                  </button>
                 </div>
               )}
 
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading || (isSignUp && !canSubmit) || (!isSignUp && (!email || !password))}
+                disabled={loading || (!canSubmit && !is2FA)}
                 className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-blue-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden group"
               >
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
@@ -305,53 +447,45 @@ export default function Login(){
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                   )}
-                  {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Sign In')}
+                  {loading ? 'Processing...' : (is2FA ? 'Verify' : (isResend ? 'Resend Confirmation Email' : (isSignUp ? 'Create Account' : 'Sign In')))}
                 </span>
               </button>
             </form>
 
-            {/* Social Login */}
-            <div className="mt-6">
-              <div className="relative my-6 flex items-center gap-3">
-                <div className="h-px flex-1 bg-white/10"></div>
-                <span className="text-xs uppercase text-gray-500 font-medium tracking-wider">Instant Access with</span>
-                <div className="h-px flex-1 bg-white/10"></div>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleOAuth('google')}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white text-gray-900 hover:bg-gray-100 font-bold rounded-xl transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-white/5"
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                  </svg>
-                  <span>Continue with Google</span>
-                </button>
-              </div>
-            </div>
-
             {/* Switch Mode */}
-            <div className="text-center mt-8">
+            <div className="text-center mt-8 space-y-4">
               <p className="text-gray-400 text-sm">
-                {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+                {isResend ? 'Remembered it?' : (isSignUp ? 'Already have an account?' : "Don't have an account?")}
                 <button
                   type="button"
                   onClick={() => {
+                    setIsResend(false)
                     setIsSignUp(!isSignUp)
-                    setMsg('')
+                    setNotice(null)
                     setTouched({ username: false, email: false, password: false, phone: false })
                   }}
                   className="ml-2 text-blue-400 hover:text-blue-300 font-medium transition-colors hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded-md px-1"
                 >
-                  {isSignUp ? 'Sign In' : 'Sign Up'}
+                  {isResend ? 'Sign In' : (isSignUp ? 'Sign In' : 'Sign Up')}
                 </button>
               </p>
+              
+              {!isResend && !isSignUp && (
+                <p className="text-gray-400 text-sm">
+                  Didn't receive confirmation?
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsResend(true)
+                      setIsSignUp(false)
+                      setNotice(null)
+                    }}
+                    className="ml-2 text-blue-400 hover:text-blue-300 font-medium transition-colors hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded-md px-1"
+                  >
+                    Resend Email
+                  </button>
+                </p>
+              )}
             </div>
           </div>
           

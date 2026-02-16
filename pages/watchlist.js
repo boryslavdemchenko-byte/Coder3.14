@@ -2,7 +2,7 @@
 import Layout from '../components/Layout'
 import LibraryCard from '../components/LibraryCard'
 import { useEffect, useState } from 'react'
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
+import { useSupabaseClient, useUser } from './_app'
 import { fetchWatchlist, removeFromWatchlist } from '../lib/watchlistClient'
 import Link from 'next/link'
 import BackButton from '../components/BackButton'

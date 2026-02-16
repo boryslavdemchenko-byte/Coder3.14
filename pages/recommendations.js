@@ -1,7 +1,7 @@
 import Layout from '../components/Layout'
 import Card from '../components/Card'
 import { useEffect, useState } from 'react'
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
+import { useSupabaseClient, useUser } from './_app'
 import { fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../lib/watchlistClient'
 import Link from 'next/link'
 import BackButton from '../components/BackButton'

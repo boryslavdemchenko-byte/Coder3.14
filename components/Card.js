@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import * as tmdb from '../lib/tmdb'
-import { useUser } from '@supabase/auth-helpers-react'
+import { useUser } from '../pages/_app'
 import AuthModal from './AuthModal'
 
 export default function Card({ item, inWatchlist = false, onToggleWatchlist }) {

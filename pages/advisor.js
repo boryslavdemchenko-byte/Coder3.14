@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import Layout from '../components/Layout'
 import { getSubscriptionAdvice, getMovieRecommendation } from '../lib/ai'
 import { MOVIE_DATA } from '../lib/movieLogic'
-import { useUser } from '@supabase/auth-helpers-react'
+import { useUser } from './_app'
 import Link from 'next/link'
 import AuthModal from '../components/AuthModal'
 

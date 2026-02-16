@@ -1,11 +1,12 @@
 import Layout from '../components/Layout'
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
+import { useSupabaseClient, useUser } from './_app'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Toast from '../components/Toast'
 import ProfileSection from '../components/settings/ProfileSection'
 import RegionSection from '../components/settings/RegionSection'
 import SecuritySection from '../components/settings/SecuritySection'
+import ContentPreferencesSection from '../components/settings/ContentPreferencesSection'
 
 export default function Settings() {
   const user = useUser()
@@ -48,6 +49,20 @@ export default function Settings() {
     setFormData(prev => ({ ...prev, [field]: value }))
     setIsDirty(true)
   }
+
+  // Keyboard shortcut for saving
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (isDirty && !saving) {
+          handleBulkSave();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDirty, saving, formData]); // formData dependency needed for closure if handleBulkSave uses it
 
   const handleBulkSave = async () => {
     setSaving(true)
@@ -99,6 +114,33 @@ export default function Settings() {
     } catch (e) {
       console.error(e)
       setToastMsg('Error updating password')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    setSaving(true)
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData?.session?.access_token
+      if (!token) {
+        setToastMsg('You must be signed in to delete your account.')
+        return
+      }
+
+      const res = await fetch('/api/delete-account', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json?.error || 'Delete failed')
+
+      await supabase.auth.signOut()
+      router.replace('/')
+    } catch (e) {
+      console.error(e)
+      setToastMsg(e.message || 'Error deleting account')
     } finally {
       setSaving(false)
     }
@@ -177,11 +219,17 @@ export default function Settings() {
                   <div className="space-y-6">
                     <ProfileSection formData={formData} onChange={handleChange} />
                     <RegionSection region={formData.region} onChange={handleChange} />
+                    <ContentPreferencesSection />
                   </div>
                 )}
                 
                 {activeTab === 'security' && (
-                  <SecuritySection onPasswordChange={handlePasswordChange} />
+                  <SecuritySection 
+                    onPasswordChange={handlePasswordChange} 
+                    onDeleteAccount={handleDeleteAccount} 
+                    deletingAccount={saving} 
+                    supabase={supabase}
+                  />
                 )}
               </div>
             </div>

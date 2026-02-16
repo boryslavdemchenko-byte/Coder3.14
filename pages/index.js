@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useUser } from '@supabase/auth-helpers-react'
+import { useUser } from './_app'
 import Link from 'next/link'
 import Layout from '../components/Layout'
 import Card from '../components/Card'
@@ -92,10 +92,20 @@ export default function Home() {
             )}
           </div>
         </div>
-        
-        {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-full h-full opacity-20 pointer-events-none">
-          <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[150px]"></div>
+
+        <div className="absolute inset-0 pointer-events-none">
+          <div
+            className="absolute inset-0 opacity-35 bg-cover bg-right"
+            style={{
+              backgroundImage:
+                "url('https://coreva-normal.trae.ai/api/ide/v1/text_to_image?prompt=cinematic%20collage%20of%20movie%20and%20tv%20posters%2C%20staggered%20diagonal%20grid%2C%20dark%20vignette%20left%2C%20vivid%20poster%20colors%20right%2C%20glossy%20modern%20look%2C%20soft%20depth%20of%20field%2C%20high%20detail%2C%2016%3A9&image_size=landscape_16_9')",
+              maskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 82%)',
+              WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 82%)',
+            }}
+          ></div>
+          <div className="absolute inset-0 bg-gradient-to-l from-black/90 via-black/50 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/50"></div>
+          <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[150px] opacity-30"></div>
         </div>
       </section>
 

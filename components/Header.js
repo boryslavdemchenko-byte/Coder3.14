@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
+import { useUser, useSupabaseClient } from '../pages/_app'
 import { useEffect, useState } from 'react'
 import AuthModal from './AuthModal'
 import RedirectModal from './RedirectModal'

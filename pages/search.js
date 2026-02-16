@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Layout from '../components/Layout'
 import * as tmdb from '../lib/tmdb'
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
+import { useSupabaseClient, useUser } from './_app'
 import { addToWatchlist, removeFromWatchlist, fetchWatchlist } from '../lib/watchlistClient'
 import Card from '../components/Card'
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
-import { useUser } from '@supabase/auth-helpers-react'
+import { useUser } from './_app'
 import * as tmdb from '../lib/tmdb'
 import Link from 'next/link'
 

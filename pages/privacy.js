@@ -1,45 +1,58 @@
-import Layout from '../components/Layout'
+import Link from 'next/link'
+import PolicyShell from '../components/policy/PolicyShell'
+import PolicyBlocks from '../components/policy/PolicyBlocks'
+import { POLICIES, POLICY_CONTACT_EMAIL } from '../lib/policies'
 
 export default function Privacy() {
+  const policy = POLICIES.privacy
+  const tocItems = policy.sections.map((s) => ({ id: s.id, label: s.heading }))
+
   return (
-    <Layout title="Privacy Policy - Flico">
-      <div className="max-w-3xl mx-auto prose prose-invert">
-        <h1 className="text-4xl font-bold text-white mb-8">Privacy Policy</h1>
-        
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-blue-400 mb-4">1. Information We Collect</h2>
-          <p className="text-gray-300 leading-relaxed">
-            We collect information you provide directly to us, such as when you create an account, update your profile, or communicate with us. This may include your name, email address, and movie preferences.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-blue-400 mb-4">2. How We Use Your Information</h2>
-          <p className="text-gray-300 leading-relaxed">
-            We use the information we collect to:
-          </p>
-          <ul className="list-disc pl-6 text-gray-300 space-y-2 mt-2">
-            <li>Provide, maintain, and improve our services</li>
-            <li>Personalize your experience and provide movie recommendations</li>
-            <li>Send you technical notices and support messages</li>
-            <li>Monitor and analyze trends and usage</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-blue-400 mb-4">3. Cookies</h2>
-          <p className="text-gray-300 leading-relaxed">
-            We use cookies to help us understand how you interact with our website and to improve your experience. You can control cookies through your browser settings.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-blue-400 mb-4">4. Contact Us</h2>
-          <p className="text-gray-300 leading-relaxed">
-            If you have any questions about this Privacy Policy, please contact us at support@flico.app.
-          </p>
-        </section>
+    <PolicyShell
+      title={policy.title}
+      description={policy.description}
+      lastUpdated={policy.lastUpdated}
+      pdfHref={`/api/policy-pdf?doc=${policy.key}`}
+      pdfFileName={`flico-${policy.key}.pdf`}
+      tocItems={tocItems}
+    >
+      <div className="space-y-10">
+        {policy.sections.map((s) => (
+          <section key={s.id} className="pb-10 border-b border-white/10 last:border-none">
+            <h2 id={s.id} className="scroll-mt-28 text-2xl font-bold text-white mb-4">
+              {s.heading}
+            </h2>
+            <PolicyBlocks blocks={s.blocks} />
+            {s.id === 'cookies' && (
+              <div className="mt-5 inline-flex items-center gap-3">
+                <Link href="/cookies" className="text-sm font-semibold text-blue-400 hover:text-blue-300 hover:underline">
+                  Read the Cookie Policy
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== 'undefined') window.dispatchEvent(new Event('flico:open-cookie-preferences'))
+                  }}
+                  className="text-sm font-semibold text-gray-200 hover:text-white"
+                >
+                  Manage cookie preferences
+                </button>
+              </div>
+            )}
+            {s.id === 'contact' && (
+              <div className="mt-6 rounded-2xl bg-black/20 border border-white/10 p-5">
+                <div className="text-white font-bold">Contact options</div>
+                <div className="mt-2 text-gray-300 text-sm">
+                  Email: <a className="text-blue-400 hover:underline" href={`mailto:${POLICY_CONTACT_EMAIL}`}>{POLICY_CONTACT_EMAIL}</a>
+                </div>
+                <div className="mt-2 text-gray-300 text-sm">
+                  Contact page: <Link href="/contact" className="text-blue-400 hover:underline">Open contact page</Link>
+                </div>
+              </div>
+            )}
+          </section>
+        ))}
       </div>
-    </Layout>
+    </PolicyShell>
   )
 }
