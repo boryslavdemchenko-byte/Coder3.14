@@ -193,7 +193,7 @@ export default function Title() {
                  {details.title}
                </h1>
 
-               {details.tagline && <p className="text-xl text-gray-400 italic font-light">"{details.tagline}"</p>}
+               {details.tagline && <p className="text-xl text-gray-400 italic font-light">&ldquo;{details.tagline}&rdquo;</p>}
 
                {/* Rating & Genres */}
                <div className="flex flex-wrap items-center gap-6">

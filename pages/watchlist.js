@@ -53,7 +53,7 @@ export default function Watchlist() {
             <div className="flex items-end justify-between">
               <div>
                 <h1 className="text-4xl font-bold text-white tracking-tight">Your Library</h1>
-                <p className="text-gray-400 mt-2 text-lg">Movies and shows you've saved and tracked.</p>
+                <p className="text-gray-400 mt-2 text-lg">Movies and shows you&apos;ve saved and tracked.</p>
               </div>
               {items && items.length > 0 && (
                 <div className="hidden sm:block text-gray-500 font-medium">
@@ -85,7 +85,7 @@ export default function Watchlist() {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-white mb-3">Your library is empty</h2>
-            <p className="text-gray-400 mb-8 max-w-md text-lg">Start building your collection by adding movies and shows you're interested in.</p>
+            <p className="text-gray-400 mb-8 max-w-md text-lg">Start building your collection by adding movies and shows you&apos;re interested in.</p>
             <Link href="/" className="px-8 py-3 bg-white text-black hover:bg-gray-200 rounded-full font-bold transition-all hover:-translate-y-1">
               Explore Content
             </Link>

@@ -83,7 +83,7 @@ export default function About() {
                     In a world with endless content, finding what to watch shouldn't feel like a chore. We built Flico to bring clarity to the chaos. 
                   </p>
                   <p className="text-gray-400 text-lg leading-relaxed">
-                    Whether you're a casual viewer or a dedicated cinephile, our goal is to provide a seamless, personalized, and social experience that connects you with the stories that matter.
+                    Whether you&apos;re a casual viewer or a dedicated cinephile, our goal is to provide a seamless, personalized, and social experience that connects you with the stories that matter.
                   </p>
                 </div>
                 <div className="relative h-64 w-full rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden border border-white/10 flex items-center justify-center group-hover:scale-[1.02] transition-transform duration-500">
