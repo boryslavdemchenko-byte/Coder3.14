@@ -411,6 +411,7 @@ export default function Login(){
                     <p className="text-xs text-red-400 ml-1 animate-in slide-in-from-top-1">{passwordFeedback}</p>
                   )}
                 </div>
+              )}
               {/* Error/Success Message */}
               {notice?.text && (
                 <div className={`p-3 rounded-xl text-sm text-center animate-in fade-in slide-in-from-top-2 ${notice.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
@@ -448,12 +449,14 @@ export default function Login(){
                   {loading ? 'Processing...' : (is2FA ? 'Verify' : (isResend ? 'Resend Confirmation Email' : (isSignUp ? 'Create Account' : 'Sign In')))}
                 </span>
               </button>
+                </>
+              )}
             </form>
 
             {/* Switch Mode */}
             <div className="text-center mt-8 space-y-4">
               <p className="text-gray-400 text-sm">
-                {isResend ? 'Remembered it?' : (isSignUp ? 'Already have an account?' : "Don't have an account?")}
+                {isResend ? 'Remembered it?' : (isSignUp ? 'Already have an account?' : 'Do not have an account?')}
                 <button
                   type="button"
                   onClick={() => {
@@ -470,7 +473,7 @@ export default function Login(){
               
               {!isResend && !isSignUp && (
                 <p className="text-gray-400 text-sm">
-                  Didn't receive confirmation?
+                  Did not receive confirmation?
                   <button
                     type="button"
                     onClick={() => {

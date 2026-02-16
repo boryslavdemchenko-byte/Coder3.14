@@ -19,7 +19,7 @@ export default function About() {
   const features = [
     {
       title: "Smart Discovery",
-      description: "Stop scrolling and start watching. Our AI-powered engine learns your taste to suggest hidden gems and trending hits you'll actually love.",
+      description: "Stop scrolling and start watching. Our AI-powered engine learns your taste to suggest hidden gems and trending hits you&apos;ll actually love.",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -28,7 +28,7 @@ export default function About() {
     },
     {
       title: "Universal Watchlist",
-      description: "Keep track of everything in one place. Whether it's on Netflix, Disney+, or in theaters, add it to your Flico list and never forget a title again.",
+      description: "Keep track of everything in one place. Whether it&apos;s on Netflix, Disney+, or in theaters, add it to your Flico list and never forget a title again.",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -50,7 +50,7 @@ export default function About() {
     <Layout title="About Us - Flico">
       <Head>
         <title>About Us - Flico</title>
-        <meta name="description" content="Discover Flico's mission to revolutionize how you find, track, and share movies and TV shows." />
+        <meta name="description" content="Discover Flico&apos;s mission to revolutionize how you find, track, and share movies and TV shows." />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -80,7 +80,7 @@ export default function About() {
                 <div className="space-y-6">
                   <h2 className="text-3xl font-bold text-white">Our Mission</h2>
                   <p className="text-gray-400 text-lg leading-relaxed">
-                    In a world with endless content, finding what to watch shouldn't feel like a chore. We built Flico to bring clarity to the chaos. 
+                    In a world with endless content, finding what to watch shouldn&apos;t feel like a chore. We built Flico to bring clarity to the chaos. 
                   </p>
                   <p className="text-gray-400 text-lg leading-relaxed">
                     Whether you&apos;re a casual viewer or a dedicated cinephile, our goal is to provide a seamless, personalized, and social experience that connects you with the stories that matter.
