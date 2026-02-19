@@ -457,9 +457,11 @@ export default function Login(){
     is2FA ? 'Verify' : (isResend ? 'Resend Confirmation Email' : (isSignUp ? 'Create Account' : 'Sign In'))
   )}
 </span>
+</button>
+</>
+)}
+</form>
 
-              </button>
-            </form>
 
             {/* Switch Mode */}
             <div className="text-center mt-8 space-y-4">
