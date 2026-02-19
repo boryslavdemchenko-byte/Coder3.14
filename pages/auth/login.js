@@ -407,9 +407,11 @@ export default function Login(){
                     </button>
                   </div>
 
-                  {touched.password && passwordFeedback && (
-                    <p className="text-xs text-red-400 ml-1 animate-in slide-in-from-top-1">{passwordFeedback}</p>
-                  )}
+                {touched.password && passwordFeedback && (
+              <p className="text-xs text-red-400 ml-1 animate-in slide-in-from-top-1">
+  {passwordFeedback}
+</p>
+)}
                 </div>
               {/* Error/Success Message */}
               {notice?.text && (
