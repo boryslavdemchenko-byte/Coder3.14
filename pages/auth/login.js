@@ -407,26 +407,24 @@ export default function Login(){
                     </button>
                   </div>
 
-                {touched.password && passwordFeedback && (
-              <p className="text-xs text-red-400 ml-1 animate-in slide-in-from-top-1">
-  {passwordFeedback}
-</p>
-)}
-                </div>
-  {/* Error/Success Message */}
-{notice?.text && (
-  <div className={`p-3 rounded-xl text-sm text-center animate-in fade-in slide-in-from-top-2 ${
-    notice.type === 'error'
-      ? 'bg-red-50 text-red-700'
-      : 'bg-green-50 text-green-700'
-  }`}>
-    {notice.text}
-  </div>
-)}
+                 {touched.password && passwordFeedback && (
+                  <p className="text-xs text-red-400 ml-1 animate-in slide-in-from-top-1">
+                    {passwordFeedback}
+                  </p>
+                )}
+              </div>
+            )}
 
+            {/* Error/Success Message */}
+            {notice?.text && (
+              <div className={`p-3 rounded-xl text-sm text-center animate-in fade-in slide-in-from-top-2 ${
+                notice.type === 'error' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
+              }`}>
+                {notice.text}
+              </div>
+            )}
 
-
-              {isResend && (
+            {isResend && (
                 <div className="space-y-2">
                   <button
                     type="button"
