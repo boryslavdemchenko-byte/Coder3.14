@@ -413,12 +413,20 @@ export default function Login(){
 </p>
 )}
                 </div>
-              {/* Error/Success Message */}
-              {notice?.text && (
-                <div className={`p-3 rounded-xl text-sm text-center animate-in fade-in slide-in-from-top-2 ${notice.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                  {notice.text}
-                </div>
-              )}
+         {someCondition ? (
+  <div>First branch</div>
+) : (
+  notice?.text && (
+    <div className={`p-3 rounded-xl text-sm text-center animate-in fade-in slide-in-from-top-2 ${
+      notice.type === 'error'
+        ? 'bg-red-50 text-red-700'
+        : 'bg-green-50 text-green-700'
+    }`}>
+      {notice.text}
+    </div>
+  )
+)}
+
 
               {isResend && (
                 <div className="space-y-2">
